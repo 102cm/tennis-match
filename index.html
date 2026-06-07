@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#19735f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="테니스 대진" />
+    <title>테니스 복식 대진 편성</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="clubGate" class="club-gate">
+      <section class="club-card" aria-labelledby="clubGateTitle">
+        <p class="eyebrow">Tennis Scheduler</p>
+        <h1 id="clubGateTitle">클럽 선택</h1>
+        <div class="club-form">
+          <label>
+            <span>저장된 클럽</span>
+            <select id="clubSelect"></select>
+          </label>
+          <button id="enterClubBtn" class="primary-btn" type="button">시작</button>
+        </div>
+        <div class="club-form">
+          <label>
+            <span>새 클럽</span>
+            <input id="newClubName" type="text" placeholder="클럽 이름" />
+          </label>
+          <button id="addClubBtn" class="text-btn" type="button">클럽 추가</button>
+        </div>
+      </section>
+    </div>
+
+    <main class="app-shell">
+      <section class="workspace" id="workspace">
+        <aside class="panel input-panel" aria-label="대진 입력">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Tennis Scheduler</p>
+              <h1>복식 대진 편성</h1>
+              <div class="club-current">
+                <span id="currentClubName">클럽 미선택</span>
+                <button id="switchClubBtn" class="text-btn tiny-btn" type="button">클럽 변경</button>
+              </div>
+            </div>
+            <button id="sampleBtn" class="icon-btn" type="button" title="샘플 입력">↺</button>
+          </div>
+
+          <form id="scheduleForm" class="form-stack">
+            <div class="field-row">
+              <label>
+                <span>코트 수</span>
+                <input id="courtCount" type="number" min="1" max="20" value="3" />
+              </label>
+              <label>
+                <span>시작</span>
+                <input id="startTime" type="time" value="18:00" />
+              </label>
+              <label>
+                <span>종료</span>
+                <input id="endTime" type="time" value="21:00" />
+              </label>
+              <button id="applyTimeBtn" class="text-btn apply-time-btn" type="button">시간 일괄적용</button>
+            </div>
+
+            <div class="section-title">
+              <h2>참가자</h2>
+            </div>
+
+            <div class="roster-grid">
+              <section class="roster-panel" aria-label="남자 명단">
+                <div class="roster-head">
+                  <h3>남자 명단</h3>
+                  <button id="addMaleBtn" class="text-btn" type="button">+ 남자</button>
+                </div>
+                <div class="table-wrap input-table-wrap">
+                  <table class="input-table">
+                    <thead>
+                      <tr>
+                        <th>No.</th>
+                        <th>이름</th>
+                        <th>실력</th>
+                        <th>참여 시작</th>
+                        <th>참여 종료</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="malePlayersBody"></tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section class="roster-panel" aria-label="여자 명단">
+                <div class="roster-head">
+                  <h3>여자 명단</h3>
+                  <button id="addFemaleBtn" class="text-btn" type="button">+ 여자</button>
+                </div>
+                <div class="table-wrap input-table-wrap">
+                  <table class="input-table">
+                    <thead>
+                      <tr>
+                        <th>No.</th>
+                        <th>이름</th>
+                        <th>실력</th>
+                        <th>참여 시작</th>
+                        <th>참여 종료</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="femalePlayersBody"></tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+
+            <section class="member-panel" aria-label="회원명단">
+              <div class="roster-head">
+                <h3>회원명단 <span class="roster-count" id="memberCount">0명</span></h3>
+              </div>
+              <div class="member-editor">
+                <input id="memberName" type="text" placeholder="회원 이름" />
+                <select id="memberGender">
+                  <option value="M">남</option>
+                  <option value="F">여</option>
+                </select>
+                <input id="memberScore" type="number" min="1" max="10" step="1" value="5" aria-label="회원 실력" />
+                <button id="saveMemberBtn" class="text-btn" type="button">저장</button>
+              </div>
+              <div class="table-wrap member-table-wrap">
+                <table class="member-table">
+                  <thead>
+                    <tr>
+                      <th>이름</th>
+                      <th>성별</th>
+                      <th>실력</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="membersBody"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <button class="primary-btn" type="submit">대진표 생성</button>
+          </form>
+        </aside>
+
+        <div class="workspace-resizer" id="workspaceResizer" role="separator" aria-label="입력 영역 너비 조절" aria-orientation="vertical" tabindex="0"></div>
+
+        <section class="results" aria-live="polite">
+          <div class="summary-grid" id="summaryGrid"></div>
+
+          <div class="panel">
+            <div class="panel-head compact">
+              <div>
+                <p class="eyebrow">Schedule</p>
+                <h2>코트별 대진표</h2>
+              </div>
+              <div class="panel-actions">
+                <button id="shareImageBtn" class="text-btn" type="button">이미지 다운로드</button>
+                <button id="copyBtn" class="text-btn" type="button">복사</button>
+              </div>
+            </div>
+            <div id="scheduleOutput" class="schedule-output"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head compact">
+              <div>
+                <p class="eyebrow">Fairness</p>
+                <h2>참가자별 배정 현황</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>참가자</th>
+                    <th>성별</th>
+                    <th>실력</th>
+                    <th>참여시간</th>
+                    <th>배정 게임</th>
+                    <th>배정률</th>
+                  </tr>
+                </thead>
+                <tbody id="fairnessBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div id="memberPicker" class="modal-backdrop" hidden>
+      <section class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="memberPickerTitle">
+        <div class="panel-head compact">
+          <div>
+            <p class="eyebrow">Members</p>
+            <h2 id="memberPickerTitle">회원 선택</h2>
+          </div>
+          <button id="memberPickerCloseBtn" class="icon-btn" type="button" title="닫기">×</button>
+        </div>
+        <div class="member-picker-body">
+          <div class="table-wrap member-picker-table-wrap">
+            <table class="member-table">
+              <thead>
+                <tr>
+                  <th>선택</th>
+                  <th>이름</th>
+                  <th>실력</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody id="memberPickerBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="memberPickerBlankBtn" class="text-btn" type="button">빈 행 추가</button>
+          <button id="memberPickerAddBtn" class="primary-btn modal-primary-btn" type="button">선택 추가</button>
+        </div>
+      </section>
+    </div>
+
+    <template id="playerRowTemplate">
+      <tr>
+        <td class="row-no"></td>
+        <td><input class="player-name" type="text" placeholder="이름" /></td>
+        <td><input class="player-score" type="number" min="1" max="10" step="1" value="5" /></td>
+        <td><input class="player-start" type="time" /></td>
+        <td><input class="player-end" type="time" /></td>
+        <td><button class="remove-btn" type="button" title="삭제">×</button></td>
+      </tr>
+    </template>
+
+    <script src="./app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js");
+        });
+      }
+    </script>
+  </body>
+</html>
