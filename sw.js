@@ -1,11 +1,10 @@
-const CACHE_NAME = "tennis-scheduler-v4";
+const CACHE_NAME = "tennis-scheduler-v5";
 const APP_ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./manifest.webmanifest",
-  "./seed-data.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
 ];
