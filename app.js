@@ -1,9 +1,7 @@
 const GAME_MINUTES = 30;
-const MEMBERS_STORAGE_KEY = "tennisMembers";
 const CLUBS_STORAGE_KEY = "tennisClubs";
 const SELECTED_CLUB_STORAGE_KEY = "tennisSelectedClub";
 const MEMBERS_BY_CLUB_STORAGE_KEY = "tennisMembersByClub";
-const SEED_DATA_URL = "./seed-data.json";
 
 const samplePlayers = [
   ["김민준", "M", 9, "18:00", "21:00"],
@@ -51,7 +49,6 @@ const els = {
   memberGender: document.querySelector("#memberGender"),
   memberScore: document.querySelector("#memberScore"),
   saveMemberBtn: document.querySelector("#saveMemberBtn"),
-  exportSeedBtn: document.querySelector("#exportSeedBtn"),
   memberCount: document.querySelector("#memberCount"),
   membersBody: document.querySelector("#membersBody"),
   memberPicker: document.querySelector("#memberPicker"),
@@ -138,84 +135,8 @@ function saveMemberStore(store) {
   localStorage.setItem(MEMBERS_BY_CLUB_STORAGE_KEY, JSON.stringify(store));
 }
 
-function normalizeMember(member) {
-  const name = normalizeName(member?.name || "");
-  const gender = member?.gender === "F" ? "F" : "M";
-  const score = Number(member?.score);
-  if (!name || score < 1 || score > 10) return null;
-  return { name, gender, score };
-}
-
-function mergeSeedData(seed) {
-  const seedClubs = Array.isArray(seed?.clubs) ? seed.clubs.map(normalizeName).filter(Boolean) : [];
-  const seedMembersByClub = seed?.membersByClub && typeof seed.membersByClub === "object" ? seed.membersByClub : {};
-  const store = memberStore();
-  let changed = false;
-
-  seedClubs.forEach((club) => {
-    if (!clubs.includes(club)) {
-      clubs.push(club);
-      changed = true;
-    }
-  });
-
-  Object.entries(seedMembersByClub).forEach(([clubName, seedMembers]) => {
-    const club = normalizeName(clubName);
-    if (!club || !Array.isArray(seedMembers)) return;
-    if (!clubs.includes(club)) {
-      clubs.push(club);
-      changed = true;
-    }
-    const existingMembers = Array.isArray(store[club]) ? store[club] : [];
-    const existingNames = new Set(existingMembers.map((member) => normalizeName(member.name)));
-    seedMembers.forEach((seedMember) => {
-      const member = normalizeMember(seedMember);
-      if (!member || existingNames.has(member.name)) return;
-      existingMembers.push(member);
-      existingNames.add(member.name);
-      changed = true;
-    });
-    store[club] = existingMembers;
-  });
-
-  if (!changed) return;
-  clubs.sort((a, b) => a.localeCompare(b, "ko"));
-  localStorage.setItem(CLUBS_STORAGE_KEY, JSON.stringify(clubs));
-  saveMemberStore(store);
-}
-
-async function loadSeedData() {
-  try {
-    const response = await fetch(SEED_DATA_URL, { cache: "no-store" });
-    if (!response.ok) return;
-    mergeSeedData(await response.json());
-  } catch {
-    // Local file previews cannot always fetch JSON. The app still works without seed data.
-  }
-}
-
-function migrateLegacyMembers() {
-  const legacyMembers = readJson(MEMBERS_STORAGE_KEY, []);
-  const store = memberStore();
-  const btgClub = "BTG";
-  if (store["기본 클럽"]?.length && !store[btgClub]?.length) {
-    store[btgClub] = store["기본 클럽"];
-    delete store["기본 클럽"];
-    clubs = clubs.filter((club) => club !== "기본 클럽");
-  }
-  if (legacyMembers.length && !store[btgClub]?.length) {
-    store[btgClub] = legacyMembers;
-  }
-  if (!store[btgClub]?.length) return;
-  saveMemberStore(store);
-  clubs = clubs.includes(btgClub) ? clubs : [btgClub, ...clubs];
-  localStorage.setItem(CLUBS_STORAGE_KEY, JSON.stringify(clubs));
-  localStorage.removeItem(MEMBERS_STORAGE_KEY);
-}
-
 function loadClubs() {
   clubs = readJson(CLUBS_STORAGE_KEY, []);
-  migrateLegacyMembers();
   renderClubSelect();
 }
 
@@ -324,23 +245,6 @@ function saveMemberFromForm() {
   els.memberScore.value = "5";
   saveMembers();
   autofillAllParticipantScores();
-}
-
-function exportSeedData() {
-  const store = memberStore();
-  if (currentClub) {
-    store[currentClub] = members;
-  }
-  const data = {
-    clubs,
-    membersByClub: store,
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "seed-data.json";
-  link.click();
-  URL.revokeObjectURL(link.href);
 }
 
 function applyMemberToRow(row) {
@@ -1003,7 +907,6 @@ els.applyTimeBtn.addEventListener("click", () => {
   generate();
 });
 els.saveMemberBtn.addEventListener("click", saveMemberFromForm);
-els.exportSeedBtn.addEventListener("click", exportSeedData);
 els.memberName.addEventListener("keydown", (event) => {
   if (event.key !== "Enter") return;
   event.preventDefault();
@@ -1044,10 +947,8 @@ els.copyBtn.addEventListener("click", async () => {
 });
 els.shareImageBtn.addEventListener("click", downloadShareImage);
 
-async function initApp() {
+function initApp() {
   setupWorkspaceResizer();
-  clubs = readJson(CLUBS_STORAGE_KEY, []);
-  await loadSeedData();
   loadClubs();
   updateRosterNumbers();
   els.scheduleOutput.innerHTML = `<div class="empty-state">클럽을 선택한 뒤 참가자를 추가해주세요.</div>`;

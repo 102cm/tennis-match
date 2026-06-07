@@ -19,21 +19,8 @@
 - `app.js`
 - `manifest.webmanifest`
 - `sw.js`
-- `seed-data.json`
 - `icons/icon-192.png`
 - `icons/icon-512.png`
-
-## BTG 회원명단 함께 배포하기
-
-새로 설치하는 운영진도 BTG 클럽과 회원명단을 처음부터 받게 하려면 `seed-data.json`을 함께 배포해야 합니다.
-
-1. BTG 회원명단이 들어있는 기기에서 앱을 엽니다.
-2. `BTG` 클럽으로 들어갑니다.
-3. 회원명단 영역의 `배포용 데이터` 버튼을 누릅니다.
-4. 다운로드된 `seed-data.json` 파일을 GitHub 저장소의 기존 `seed-data.json`과 교체해서 업로드합니다.
-5. GitHub Pages 배포가 갱신된 뒤 운영진에게 앱 링크를 공유합니다.
-
-주의: 앱 파일에 들어간 `seed-data.json`은 새로 설치하는 기기의 초기 데이터입니다. 이미 각자 기기에서 수정한 회원명단은 자동으로 덮어쓰지 않고 유지됩니다.
 
 ## 2. Android 설치
 
