@@ -1,4 +1,4 @@
-const CACHE_NAME = "tennis-scheduler-v2";
+const CACHE_NAME = "tennis-scheduler-v3";
 const APP_ASSETS = [
   "./",
   "./index.html",

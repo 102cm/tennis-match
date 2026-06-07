@@ -518,6 +518,19 @@ function strengthBand(group) {
   return "균형 조합";
 }
 
+function canMakeGenderDoubles(players, gender) {
+  return players.filter((player) => player.gender === gender).length >= 4;
+}
+
+function typePriority(type, available) {
+  const canMakeMen = canMakeGenderDoubles(available, "M");
+  const canMakeWomen = canMakeGenderDoubles(available, "F");
+  if (type === "남자복식") return 85;
+  if (type === "여자복식") return 85;
+  if (type === "혼합복식") return canMakeMen || canMakeWomen ? -95 : 8;
+  return canMakeMen || canMakeWomen ? -130 : -18;
+}
+
 function buildCandidates(available, state, mixedTargetRatio, slot) {
   const candidates = [];
   const groups = combo4(available);
@@ -536,8 +549,8 @@ function buildCandidates(available, state, mixedTargetRatio, slot) {
       }, 0);
       const typeCounts = state.typeCounts;
       const mixedRatio = state.totalMatches ? typeCounts["혼합복식"] / state.totalMatches : 0;
-      const mixedPenalty = type === "혼합복식" && mixedRatio > mixedTargetRatio ? 12 : 0;
-      const irregularPenalty = type === "혼성보정" ? 10 : 0;
+      const mixedPenalty = type === "혼합복식" && mixedRatio > mixedTargetRatio ? 35 : 0;
+      const irregularPenalty = type === "혼성보정" ? 35 : 0;
       const sameTeamPenalty =
         type === "혼합복식" && (teamType(teamA) !== "FM" || teamType(teamB) !== "FM") ? 7 : 0;
       const pairRepeatPenalty = repeatedPartners * 5;
@@ -554,6 +567,7 @@ function buildCandidates(available, state, mixedTargetRatio, slot) {
         type !== "혼합복식" && state.typeCounts[type] <= Math.min(state.typeCounts["남자복식"], state.typeCounts["여자복식"])
           ? 1.25
           : 0;
+      const doublesPriority = typePriority(type, available);
 
       candidates.push({
         type,
@@ -566,6 +580,7 @@ function buildCandidates(available, state, mixedTargetRatio, slot) {
           fairnessNeed * 22 +
           previousWaiterCount * 120 +
           availabilityUrgency * 8 +
+          doublesPriority +
           varietyBonus +
           typeBonus -
           scoreGap * 3 -
